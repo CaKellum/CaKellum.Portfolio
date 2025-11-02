@@ -18,6 +18,8 @@ TODO:
 
 import (
 	"fmt"
+	"os"
+	"text/template"
 
 	"com.kellum.portfolio/badlogger"
 	"com.kellum.portfolio/badnet"
@@ -34,25 +36,97 @@ type ProjectInfo struct {
 	Languages []LanguageInfo
 }
 
+type BasePageProperties struct {
+	Title       string
+	Content     string
+	CurrentYear string
+}
+
+type FileBuffer struct{ Buffer []byte }
+
+func (fb *FileBuffer) Write(p []byte) (n int, err error) {
+	if len(fb.Buffer) == 0 {
+		fb.Buffer = p
+	} else {
+		fb.Buffer = append(fb.Buffer, p...)
+	}
+	return len(fb.Buffer), nil
+}
+
+func getBaseTemplate(content string) ([]byte, error) {
+	props := BasePageProperties{
+		Title:       "CaKellum",
+		Content:     content,
+		CurrentYear: "2025",
+	}
+	tmpl := template.Must(template.ParseFiles("templates/base.tmpl"))
+	fb := FileBuffer{}
+	if err := tmpl.Execute(&fb, props); err != nil {
+		return make([]byte, 0), err
+	}
+	return fb.Buffer, nil
+}
+
 func handleHome(req badnet.Request) badnet.Response {
-
-	data := []byte("hello world")
-
+	data, err := getBaseTemplate("<p>This is being deliverd via the go template</p>")
+	if err != nil {
+		errStr := fmt.Sprint(err)
+		data := []byte(errStr)
+		return badnet.Response{
+			ResponseMsg:  "Internal Server Error",
+			ResponseCode: 500,
+			Version:      badnet.V1_1,
+			Headers: map[string]string{
+				badnet.ContentType:   "text/plain",
+				badnet.ContentLength: fmt.Sprintf("%d", len(data)),
+			},
+			Data: data,
+		}
+	}
 	return badnet.Response{
 		ResponseMsg:  "OK",
 		ResponseCode: 200,
 		Version:      badnet.V1_1,
 		Headers: map[string]string{
-			badnet.ContentType:   "text/plain",
+			badnet.ContentType:   "text/html",
 			badnet.ContentLength: fmt.Sprintf("%d", len(data)),
 		},
 		Data: data,
 	}
 }
 
+func handleCSS(req badnet.Request) badnet.Response {
+	file, err := os.ReadFile("templates/static/main.css")
+	if err != nil {
+		errStr := fmt.Sprint(err)
+		data := []byte(errStr)
+		return badnet.Response{
+			ResponseMsg:  "Internal Server Error",
+			ResponseCode: 500,
+			Version:      badnet.V1_1,
+			Headers: map[string]string{
+				badnet.ContentType:   "text/plain",
+				badnet.ContentLength: fmt.Sprintf("%d", len(data)),
+			},
+			Data: data,
+		}
+	}
+	return badnet.Response{
+		ResponseMsg:  "Ok",
+		ResponseCode: 200,
+		Version:      badnet.V1_1,
+		Headers: badnet.HTTPHeaders{
+			badnet.ContentType:   "text/css",
+			badnet.ContentLength: fmt.Sprintf("%d", len(file)),
+		},
+		Data: file,
+	}
+}
+
 func main() {
 	logger := badlogger.DefaultLogger()
 	badnet.GET.RegisterPath("/", handleHome)
-	config := badnet.ServerConfiguration{Port: ":8080", Logger: &logger}
+	badnet.GET.RegisterPath("/static/main.css", handleCSS)
+	config := badnet.ServerConfiguration{Network: "tcp", Port: ":8080", Logger: &logger}
 	badnet.StartServer(config)
 }

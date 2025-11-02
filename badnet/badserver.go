@@ -125,13 +125,13 @@ func StartServer(config ServerConfiguration) {
 	for {
 		conn, connErr := l.Accept()
 		if connErr != nil {
-			msg := fmt.Sprintf("%v", lErr)
+			msg := fmt.Sprintf("%v", connErr)
 			slog(msg)
 			continue
 		}
 		handleErr := handleConnection(conn)
 		if handleErr != nil {
-			msg := fmt.Sprintf("%v", lErr)
+			msg := fmt.Sprintf("%v", handleErr)
 			slog(msg)
 			continue
 		}
