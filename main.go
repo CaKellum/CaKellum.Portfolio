@@ -1,10 +1,6 @@
 package main
 
 /**
-What has been done
-
-*/
-/**
 TODO:
 
 	* build out templates using HTMX for front end
@@ -68,7 +64,7 @@ func getBaseTemplate(content string) ([]byte, error) {
 }
 
 func handleHome(req badnet.Request) badnet.Response {
-	data, err := getBaseTemplate("<p>This is being deliverd via the go template</p>")
+	data, err := getBaseTemplate("<p>This is being deliverd via the go template <a href=\"/about\">here is the about page</a></p>")
 	if err != nil {
 		errStr := fmt.Sprint(err)
 		data := []byte(errStr)
@@ -95,6 +91,34 @@ func handleHome(req badnet.Request) badnet.Response {
 	}
 }
 
+func handleAbout(req badnet.Request) badnet.Response {
+	data, err := getBaseTemplate("<p>This is the about page</p>")
+	if err != nil {
+		errStr := fmt.Sprint(err)
+		data := []byte(errStr)
+		return badnet.Response{
+			ResponseMsg:  "Internal Server Error",
+			ResponseCode: 500,
+			Version:      badnet.V1_1,
+			Headers: badnet.HTTPHeaders{
+				badnet.ContentType:   "text/plain",
+				badnet.ContentLength: fmt.Sprintf("%d", len(data)),
+			},
+			Data: data,
+		}
+	}
+	return badnet.Response{
+		ResponseMsg:  "OK",
+		ResponseCode: 200,
+		Version:      badnet.V1_1,
+		Headers: badnet.HTTPHeaders{
+			badnet.ContentType:   "text/html",
+			badnet.ContentLength: fmt.Sprintf("%d", len(data)),
+		},
+		Data: data,
+	}
+}
+
 func handleCSS(req badnet.Request) badnet.Response {
 	file, err := os.ReadFile("templates/static/main.css")
 	if err != nil {
@@ -104,7 +128,7 @@ func handleCSS(req badnet.Request) badnet.Response {
 			ResponseMsg:  "Internal Server Error",
 			ResponseCode: 500,
 			Version:      badnet.V1_1,
-			Headers: map[string]string{
+			Headers: badnet.HTTPHeaders{
 				badnet.ContentType:   "text/plain",
 				badnet.ContentLength: fmt.Sprintf("%d", len(data)),
 			},
@@ -126,6 +150,7 @@ func handleCSS(req badnet.Request) badnet.Response {
 func main() {
 	logger := badlogger.DefaultLogger()
 	badnet.GET.RegisterPath("/", handleHome)
+	badnet.GET.RegisterPath("/about", handleAbout)
 	badnet.GET.RegisterPath("/static/main.css", handleCSS)
 	config := badnet.ServerConfiguration{Network: "tcp", Port: ":8080", Logger: &logger}
 	badnet.StartServer(config)
