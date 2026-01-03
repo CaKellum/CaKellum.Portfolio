@@ -64,7 +64,23 @@ func getBaseTemplate(content string) ([]byte, error) {
 }
 
 func handleHome(req badnet.Request) badnet.Response {
-	data, err := getBaseTemplate("<p>This is being deliverd via the go template <a href=\"/about\">here is the about page</a></p>")
+	fileData, fileErr := os.ReadFile("templates/about_content.tmpl")
+	if fileErr != nil {
+		errStr := fmt.Sprint(fileErr)
+		data := []byte(errStr)
+		return badnet.Response{
+			ResponseMsg:  "Internal Server Error",
+			ResponseCode: 500,
+			Version:      badnet.V1_1,
+			Headers: map[string]string{
+				badnet.ContentType:   "text/plain",
+				badnet.ContentLength: fmt.Sprintf("%d", len(data)),
+			},
+			Data: data,
+		}
+
+	}
+	data, err := getBaseTemplate(string(fileData))
 	if err != nil {
 		errStr := fmt.Sprint(err)
 		data := []byte(errStr)
