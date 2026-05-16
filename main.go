@@ -15,6 +15,7 @@ TODO:
 import (
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 
 	"com.kellum.portfolio/badlogger"
@@ -135,6 +136,39 @@ func handleAbout(req badnet.Request) badnet.Response {
 	}
 }
 
+func handleImages(req badnet.Request) badnet.Response {
+	path := strings.Split(req.Path, "/")
+	lenPath := len(path)
+	fileName := path[lenPath-1]
+
+	file, err := os.ReadFile(fmt.Sprintf("templates/static/%s", fileName))
+	if err != nil {
+		errStr := fmt.Sprint(err)
+		data := []byte(errStr)
+		return badnet.Response{
+			ResponseMsg:  "file not found",
+			ResponseCode: 404,
+			Version:      badnet.V1_1,
+			Headers: badnet.HTTPHeaders{
+				badnet.ContentType:   "text/plain",
+				badnet.ContentLength: fmt.Sprintf("%d", len(data)),
+			},
+			Data: data,
+		}
+	}
+
+	return badnet.Response{
+		ResponseMsg:  "Ok",
+		ResponseCode: 200,
+		Version:      badnet.V1_1,
+		Headers: badnet.HTTPHeaders{
+			badnet.ContentLength: fmt.Sprintf("%d", len(file)),
+			badnet.ContentType:   "image/jpeg",
+		},
+		Data: file,
+	}
+}
+
 func handleCSS(req badnet.Request) badnet.Response {
 	file, err := os.ReadFile("templates/static/main.css")
 	if err != nil {
@@ -168,6 +202,7 @@ func main() {
 	badnet.GET.RegisterPath("/", handleHome)
 	badnet.GET.RegisterPath("/about", handleAbout)
 	badnet.GET.RegisterPath("/static/main.css", handleCSS)
+	badnet.GET.RegisterPath("/static/image/*", handleImages)
 	config := badnet.ServerConfiguration{Network: "tcp", Port: ":8080", Logger: &logger}
 	badnet.StartServer(config)
 }
