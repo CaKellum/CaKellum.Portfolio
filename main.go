@@ -5,7 +5,6 @@ TODO:
 
 	* build out templates using HTMX for front end
 		- learn HTMX
-		- learn how template html in golang
 
 	* What do i want the website to look like? will need to sit down and think about that for a second
 	* build out enpoints and the corresponding functionality of them
@@ -199,10 +198,10 @@ func handleCSS(req badnet.Request) badnet.Response {
 
 func main() {
 	logger := badlogger.DefaultLogger()
-	badnet.GET.RegisterPath("/", handleHome)
-	badnet.GET.RegisterPath("/about", handleAbout)
-	badnet.GET.RegisterPath("/static/main.css", handleCSS)
 	badnet.GET.RegisterPath("/static/image/*", handleImages)
+	badnet.GET.RegisterPath("/static/main.css", handleCSS)
+	badnet.GET.RegisterPath("/about", handleAbout)
+	badnet.GET.RegisterPath("/", handleHome)
 	config := badnet.ServerConfiguration{Network: "tcp", Port: ":8080", Logger: &logger}
 	badnet.StartServer(config)
 }

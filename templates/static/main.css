@@ -3,3 +3,7 @@ html {
     margin: 0%;
     display: flex;
 }
+
+body {
+    color: purple;
+}

@@ -51,10 +51,10 @@ type HTTPResponseCode int
 
 const (
 	// MARK: Informational codes
-	Continue   HTTPResponseCode = 100
-	Switching  HTTPResponseCode = 101
-	Processing HTTPResponseCode = 102
-	Earlyhints HTTPResponseCode = 103
+	Continue           HTTPResponseCode = 100
+	SwitchingProtocols HTTPResponseCode = 101
+	Processing         HTTPResponseCode = 102
+	EarlyHints         HTTPResponseCode = 103
 
 	// MARK: Successful codes
 	OK                          HTTPResponseCode = 200
@@ -126,12 +126,101 @@ func (code HTTPResponseCode) responseMessage() string {
 	msg := ""
 
 	switch code {
+	case Continue:
+		msg = "Continue"
+	case SwitchingProtocols:
+		msg = "Switching Protocols"
+	case Processing:
+		msg = "Processing"
+	case EarlyHints:
+		msg = "Early Hints"
 	case OK:
 		msg = "Ok"
-	case InternalServerError:
-		msg = "Internal Server Error"
+	case Created:
+		msg = "Created"
+	case Accepted:
+		msg = "Accepted"
+	case NonauthoritativeInformation:
+		msg = "Non-Authoritative Informational"
+	case NoContent:
+		msg = "No Content"
+	case ResetContent:
+		msg = "Reset Content"
+	case PartialContent:
+		msg = "Partial Content"
+	case MultiStatus:
+		msg = "Multi-Status"
+	case AlreadyReported:
+		msg = "Alreadyy Reported"
+	case IMUsed:
+		msg = "I'm used"
+	case MultipleChoices:
+		msg = "Multiple Choices"
+	case MovedPermanently:
+		msg = "Moved Permanently"
+	case Found:
+		msg = "Found"
+	case SeeOther:
+		msg = "See Other"
+	case NotModified:
+		msg = "Mot Modified"
+	case TemporaryRedirect:
+		msg = "Temorary Redirect"
+	case PermanentRedirect:
+		msg = "Permanent redirect"
+	case BadRequest:
+		msg = "Bad Request"
+	case Unauthorized:
+		msg = "Unauthorized"
+	case PaymentRequired:
+		msg = "Payment Required"
+	case Forbidden:
+		msg = "Forbidden"
 	case NotFound:
 		msg = "Not Found"
+	case MethodNotAllowed:
+		msg = "Message Not Allowed"
+	case NotAcceptable:
+		msg = "Not Acceptable"
+	case ProxyAuthenticationRequired:
+		msg = "Proxy Authentication Required"
+	case RequestTimeOut:
+		msg = "Request Timeout"
+	case Conflict:
+		msg = "Conflict"
+	case Gone:
+		msg = "Gone"
+	case LengthRequired:
+		msg = "Length Required"
+	case PreconditionFailed:
+	case ContentTooLarge:
+	case URITooLong:
+	case UnsupportedMediaType:
+	case RangeNotSatisfiable:
+	case ExpectationFailed:
+	case ImATeapot:
+	case MisdirectedRequest:
+	case UnprocessableContent:
+	case Locked:
+	case FailedDependency:
+	case TooEarly:
+	case UpgradeRequired:
+	case PreconditionRequired:
+	case TooManyRequest:
+	case RequestHeaderFieldsTooLarge:
+	case UnavailableForLegalReasons:
+	case InternalServerError:
+		msg = "Internal Server Error"
+	case NotImplemented:
+	case BadgateWay:
+	case ServiceUnavailable:
+	case GatewayTimeout:
+	case HTTPVersionNotSupported:
+	case VariantAlsoNegotiates:
+	case InsufficientStorage:
+	case LoopDetected:
+	case NotExtended:
+	case NetworAuthenticationRequired:
 	}
 
 	return msg
